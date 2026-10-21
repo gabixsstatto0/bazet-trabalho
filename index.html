@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Slider de Ciências</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --space-black: #050611;
+    --navy: #080D20;
+    --electric-blue: #4285FF;
+    --cyan: #48E5FF;
+    --cosmic-purple: #8B5CF6;
+    --soft-white: #F5F7FF;
+    --card-bg: rgba(8, 13, 32, 0.85);
+    --border: rgba(66, 133, 255, 0.18);
+    --border-hover: rgba(72, 229, 255, 0.35);
+    --text-muted: rgba(245, 247, 255, 0.5);
+    --text-dim: rgba(245, 247, 255, 0.75);
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  *, *::before, *::after { box-sizing: inherit; margin: 0; padding: 0; }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  html, body { height: 100%; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--space-black);
+    color: var(--soft-white);
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* ── CANVAS BACKGROUND ── */
+  #cosmos { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+  /* ── PLANET DECORATIONS ── */
+  .planet {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .planet-1 {
+    width: 280px; height: 280px;
+    background: radial-gradient(circle at 35% 30%, #1a2a6c, #0d0d2b 60%, #000510);
+    box-shadow: inset -30px -20px 60px rgba(0,0,10,0.8), 0 0 60px rgba(30,60,180,0.15);
+    bottom: -60px; left: -80px;
+  }
+  .planet-2 {
+    width: 130px; height: 130px;
+    background: radial-gradient(circle at 40% 35%, #c47a3a, #7a3e10 55%, #2a0f00);
+    box-shadow: inset -15px -10px 35px rgba(0,0,0,0.7), 0 0 40px rgba(180,100,30,0.2);
+    top: 18%; right: -20px;
+  }
+  .planet-3 {
+    width: 200px; height: 200px;
+    background: radial-gradient(circle at 38% 32%, #6b3fa0, #3b1a70 55%, #0d0520);
+    box-shadow: inset -20px -15px 50px rgba(0,0,0,0.75), 0 0 50px rgba(100,50,180,0.2);
+    top: 55%; right: -50px;
+  }
+  /* Saturn ring */
+  .planet-3::after {
+    content: '';
+    position: absolute;
+    width: 260px; height: 60px;
+    border: 14px solid rgba(139,92,246,0.35);
+    border-radius: 50%;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) rotateX(70deg);
+    box-shadow: 0 0 20px rgba(139,92,246,0.2);
+  }
+
+  /* ── NEBULA LAYERS ── */
+  .nebula {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 1;
+    filter: blur(80px);
+    opacity: 0.12;
+    animation: nebulaDrift 25s ease-in-out infinite alternate;
+  }
+  .nebula-1 {
+    width: 500px; height: 400px;
+    background: radial-gradient(ellipse, var(--cosmic-purple), transparent 70%);
+    top: -100px; left: -100px;
+    animation-delay: 0s;
+  }
+  .nebula-2 {
+    width: 400px; height: 350px;
+    background: radial-gradient(ellipse, var(--electric-blue), transparent 70%);
+    bottom: 10%; right: -80px;
+    animation-delay: -12s;
+  }
+  .nebula-3 {
+    width: 300px; height: 250px;
+    background: radial-gradient(ellipse, var(--cyan), transparent 70%);
+    top: 40%; left: 20%;
+    opacity: 0.06;
+    animation-delay: -6s;
+  }
+  @keyframes nebulaDrift {
+    from { transform: translate(0, 0) scale(1); }
+    to { transform: translate(20px, 15px) scale(1.05); }
+  }
+
+  /* ── CONTENT LAYER ── */
+  .page { position: relative; z-index: 10; }
+
+  /* ── HEADER ── */
+  header {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 100;
+    padding: 0 clamp(16px, 4vw, 48px);
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(5,6,17,0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0 0 auto;
+    height: env(safe-area-inset-top, 0px);
+    background: rgba(5,6,17,0.7);
+    backdrop-filter: blur(20px);
+    z-index: 101;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--electric-blue), var(--cosmic-purple));
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    font-size: 18px;
+  }
+  .logo-text {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--soft-white);
+  }
+  .logo-text span { color: var(--cyan); }
+
+  .header-right { display: flex; align-items: center; gap: 12px; }
+
+  .env-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .env-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 8px #22c55e;
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .btn-login {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--soft-white);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    font-family: 'Inter', sans-serif;
+  }
+  .btn-login:hover { border-color: var(--border-hover); background: rgba(66,133,255,0.08); }
+  .btn-login svg { opacity: 0.7; }
+
+  /* ── HERO ── */
+  .hero {
+    padding: clamp(60px, 10vw, 120px) clamp(16px, 4vw, 48px) clamp(40px, 6vw, 80px);
+    text-align: center;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 28px;
+  }
+  .hero-eyebrow::before, .hero-eyebrow::after {
+    content: '';
+    width: 32px; height: 1px;
+    background: var(--border-hover);
+  }
+  .hero h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(36px, 7vw, 72px);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+    color: var(--soft-white);
+  }
+  .hero h1 .gradient-text {
+    background: linear-gradient(135deg, var(--cyan) 0%, var(--electric-blue) 50%, var(--cosmic-purple) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero p {
+    font-size: clamp(14px, 2vw, 17px);
+    line-height: 1.7;
+    color: var(--text-dim);
+    max-width: 480px;
+    margin: 0 auto 48px;
+  }
+
+  .hero-badges {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: rgba(66,133,255,0.07);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+  .badge-icon {
+    width: 28px; height: 28px;
+    background: linear-gradient(135deg, rgba(66,133,255,0.2), rgba(139,92,246,0.2));
+    border-radius: 7px;
+    display: grid;
+    place-items: center;
+    font-size: 14px;
+  }
+  .badge strong { color: var(--soft-white); font-weight: 600; font-size: 13px; }
+
+  /* ── FILE SECTION ── */
+  .file-section {
+    padding: 0 clamp(16px, 4vw, 48px) 80px;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+  .section-label-num {
+    font-family: 'Space Grotesk', sans-serif;
+    color: var(--electric-blue);
+    font-size: 13px;
+  }
+  .section-label-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .file-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: clamp(24px, 4vw, 40px);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    transition: border-color 0.3s, box-shadow 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .file-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(66,133,255,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .file-card:hover {
+    border-color: var(--border-hover);
+    box-shadow: 0 8px 40px rgba(66,133,255,0.12);
+  }
+
+  .file-card-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 28px;
+  }
+
+  .file-icon-wrap {
+    position: relative;
+    flex-shrink: 0;
+  }
+  .file-icon {
+    width: 72px; height: 72px;
+    background: linear-gradient(135deg, #1a3a8f, #2d1b69);
+    border-radius: 16px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(66,133,255,0.3);
+    box-shadow: 0 0 30px rgba(66,133,255,0.15);
+  }
+  .file-icon svg { width: 32px; height: 32px; }
+  .file-status-dot {
+    position: absolute;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--space-black);
+    top: -3px; right: -3px;
+  }
+  .file-status-dot.waiting { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
+  .file-status-dot.ready { background: #22c55e; box-shadow: 0 0 8px #22c55e; animation: pulse-dot 2s infinite; }
+
+  .file-info { flex: 1; min-width: 0; }
+  .file-info-meta {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .file-info h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(20px, 3vw, 28px);
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--soft-white);
+  }
+  .file-info p {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-dim);
+  }
+
+  .file-card-id {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+
+  .file-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .file-meta-cell {
+    padding: 14px 16px;
+    background: rgba(8,13,32,0.9);
+  }
+  .file-meta-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+  }
+  .file-meta-value {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--soft-white);
+  }
+
+  .btn-download {
+    width: 100%;
+    padding: 16px 24px;
+    background: linear-gradient(135deg, var(--electric-blue), var(--cosmic-purple));
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-family: 'Inter', sans-serif;
+    transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 4px 20px rgba(66,133,255,0.3);
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-download::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .btn-download:hover { transform: translateY(-1px); box-shadow: 0 8px 30px rgba(66,133,255,0.4); }
+  .btn-download:hover::after { opacity: 1; }
+  .btn-download:active { transform: translateY(0); }
+  .btn-download:disabled {
+    background: rgba(66,133,255,0.15);
+    box-shadow: none;
+    cursor: not-allowed;
+    color: var(--text-muted);
+  }
+
+  .btn-download-pending {
+    width: 100%;
+    padding: 16px 24px;
+    background: rgba(245,158,11,0.1);
+    border: 1px solid rgba(245,158,11,0.3);
+    border-radius: 12px;
+    color: #f59e0b;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .download-note {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  /* ── SECURITY SECTION ── */
+  .security-section {
+    padding: 0 clamp(16px, 4vw, 48px) 80px;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+  .security-card {
+    background: rgba(8,13,32,0.6);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px 28px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .security-icon {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, rgba(72,229,255,0.15), rgba(66,133,255,0.1));
+    border-radius: 11px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    font-size: 20px;
+  }
+  .security-text p { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+  .security-text strong { color: var(--soft-white); }
+
+  /* ── MODALS ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 200;
+    display: none;
+    place-items: center;
+    padding: 16px;
+  }
+  .modal-overlay.active { display: grid; animation: fadeInOverlay 0.2s ease; }
+  @keyframes fadeInOverlay { from { opacity: 0; } to { opacity: 1; } }
+
+  .modal {
+    background: linear-gradient(160deg, #0c1128, #070b1a);
+    border: 1px solid rgba(66,133,255,0.25);
+    border-radius: 20px;
+    padding: clamp(24px, 4vw, 40px);
+    width: 100%;
+    max-width: 420px;
+    animation: slideUpModal 0.25s cubic-bezier(0.34,1.56,0.64,1);
+    box-shadow: 0 20px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(66,133,255,0.1);
+    position: relative;
+  }
+  @keyframes slideUpModal {
+    from { transform: translateY(20px) scale(0.96); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 16px; right: 16px;
+    width: 32px; height: 32px;
+    background: rgba(255,255,255,0.06);
+    border: none;
+    border-radius: 8px;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    font-size: 18px;
+    transition: background 0.15s, color 0.15s;
+  }
+  .modal-close:hover { background: rgba(255,255,255,0.12); color: var(--soft-white); }
+
+  .modal-icon {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  .modal-icon.admin { background: linear-gradient(135deg, rgba(66,133,255,0.2), rgba(139,92,246,0.2)); }
+  .modal-icon.download { background: linear-gradient(135deg, rgba(72,229,255,0.15), rgba(66,133,255,0.15)); }
+
+  .modal h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .modal-desc {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.6;
+    margin-bottom: 28px;
+  }
+
+  .form-group { margin-bottom: 16px; }
+  .form-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .form-input-wrap { position: relative; }
+  .form-input {
+    width: 100%;
+    padding: 12px 14px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--soft-white);
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+  .form-input:focus {
+    border-color: rgba(66,133,255,0.5);
+    box-shadow: 0 0 0 3px rgba(66,133,255,0.1);
+  }
+  .form-input::placeholder { color: var(--text-muted); }
+  .toggle-pw {
+    position: absolute;
+    right: 12px; top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px;
+    display: grid;
+    place-items: center;
+    transition: color 0.15s;
+  }
+  .toggle-pw:hover { color: var(--soft-white); }
+
+  .form-error {
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 8px;
+    font-size: 13px;
+    color: #fca5a5;
+    display: none;
+  }
+  .form-error.show { display: block; }
+  .form-success {
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: rgba(34,197,94,0.1);
+    border: 1px solid rgba(34,197,94,0.3);
+    border-radius: 8px;
+    font-size: 13px;
+    color: #86efac;
+    display: none;
+  }
+  .form-success.show { display: block; }
+
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 24px;
+  }
+  .btn-cancel {
+    flex: 1;
+    padding: 12px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text-dim);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: background 0.15s;
+  }
+  .btn-cancel:hover { background: rgba(255,255,255,0.09); }
+  .btn-confirm {
+    flex: 2;
+    padding: 12px;
+    background: linear-gradient(135deg, var(--electric-blue), var(--cosmic-purple));
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: opacity 0.15s, transform 0.1s;
+    box-shadow: 0 4px 15px rgba(66,133,255,0.25);
+  }
+  .btn-confirm:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-confirm:active { transform: none; }
+  .btn-confirm:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* ── ADMIN PANEL ── */
+  .admin-panel {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(5,6,17,0.97);
+    backdrop-filter: blur(20px);
+    z-index: 150;
+    overflow-y: auto;
+    padding: 32px clamp(16px, 4vw, 48px);
+  }
+  .admin-panel.active { display: block; animation: fadeInOverlay 0.3s ease; }
+
+  .admin-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 48px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .admin-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(18px, 3vw, 24px);
+    font-weight: 700;
+    color: var(--soft-white);
+  }
+  .admin-title span { color: var(--cyan); }
+  .btn-logout {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 16px;
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 8px;
+    color: #fca5a5;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: background 0.15s;
+  }
+  .btn-logout:hover { background: rgba(239,68,68,0.18); }
+
+  .admin-body { max-width: 600px; margin: 0 auto; }
+
+  .upload-zone {
+    border: 2px dashed rgba(66,133,255,0.3);
+    border-radius: 20px;
+    padding: 48px 32px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    background: rgba(66,133,255,0.03);
+    margin-bottom: 32px;
+  }
+  .upload-zone:hover, .upload-zone.drag-over {
+    border-color: rgba(66,133,255,0.6);
+    background: rgba(66,133,255,0.07);
+  }
+  .upload-zone-icon { font-size: 48px; margin-bottom: 16px; }
+  .upload-zone h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--soft-white);
+  }
+  .upload-zone p { font-size: 14px; color: var(--text-dim); margin-bottom: 20px; }
+  .upload-formats { font-size: 12px; color: var(--text-muted); }
+  .btn-add-file {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    background: linear-gradient(135deg, var(--electric-blue), var(--cosmic-purple));
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Space Grotesk', sans-serif;
+    margin-bottom: 12px;
+    letter-spacing: 0.02em;
+    box-shadow: 0 4px 20px rgba(66,133,255,0.3);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .btn-add-file:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(66,133,255,0.4); }
+
+  #file-input { display: none; }
+
+  .file-preview {
+    display: none;
+    background: rgba(8,13,32,0.8);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+  }
+  .file-preview.show { display: block; }
+  .file-preview-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  .file-preview-icon {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, rgba(66,133,255,0.2), rgba(139,92,246,0.2));
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .file-preview-info { flex: 1; min-width: 0; }
+  .file-preview-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--soft-white);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 3px;
+  }
+  .file-preview-meta { font-size: 12px; color: var(--text-muted); }
+
+  .progress-bar-wrap {
+    height: 4px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--electric-blue), var(--cyan));
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.1s linear;
+  }
+  .progress-text { font-size: 12px; color: var(--text-muted); text-align: center; }
+
+  .upload-actions { display: flex; gap: 10px; }
+
+  .admin-current {
+    background: rgba(8,13,32,0.8);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 24px;
+  }
+  .admin-current h4 {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+  }
+  .current-file-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .current-file-info { flex: 1; min-width: 140px; }
+  .current-file-name { font-size: 14px; font-weight: 600; color: var(--soft-white); }
+  .current-file-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .no-file-msg { font-size: 14px; color: var(--text-muted); text-align: center; padding: 12px 0; }
+  .btn-delete {
+    padding: 8px 14px;
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.25);
+    border-radius: 8px;
+    color: #fca5a5;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: background 0.15s;
+  }
+  .btn-delete:hover { background: rgba(239,68,68,0.2); }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 32px clamp(16px, 4vw, 48px);
+    text-align: center;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-muted);
+    position: relative;
+    z-index: 10;
+  }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: rgba(8,13,32,0.95);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-size: 13px;
+    color: var(--soft-white);
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.25s, transform 0.25s;
+    white-space: nowrap;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    max-width: calc(100vw - 32px);
+    text-align: center;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.success { border-color: rgba(34,197,94,0.4); }
+  .toast.error { border-color: rgba(239,68,68,0.4); }
+
+  /* ── CANVAS STARS ── */
+  #cosmos { position: fixed; inset: 0; z-index: 0; }
+
+  /* reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  @media (max-width: 600px) {
+    .planet-1 { width: 180px; height: 180px; }
+    .planet-2 { width: 80px; height: 80px; right: -15px; }
+    .planet-3 { width: 120px; height: 120px; }
+    .planet-3::after { width: 160px; height: 36px; border-width: 9px; }
+    .env-badge { display: none; }
+    .file-meta-grid { grid-template-columns: 1fr 1fr; }
+    .file-meta-cell:last-child { grid-column: 1/-1; }
+    .hero-badges { flex-direction: column; align-items: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Stars canvas -->
+<canvas id="cosmos"></canvas>
+
+<!-- Nebulas -->
+<div class="nebula nebula-1"></div>
+<div class="nebula nebula-2"></div>
+<div class="nebula nebula-3"></div>
+
+<!-- Planets -->
+<div class="planet planet-1"></div>
+<div class="planet planet-2"></div>
+<div class="planet planet-3"></div>
+
+<div class="page">
+  <!-- HEADER -->
+  <header>
+    <a href="#" class="logo">
+      <div class="logo-icon">🔬</div>
+      <span class="logo-text"><span>SLIDER</span> DE CIÊNCIAS</span>
+    </a>
+    <div class="header-right">
+      <div class="env-badge">
+        <div class="env-dot"></div>
+        Ambiente protegido
+      </div>
+      <button class="btn-login" id="btn-open-login">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        Login
+      </button>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-eyebrow">Conhecimento em órbita ✦</div>
+    <h1>Seu conhecimento vai<br><span class="gradient-text">além das estrelas.</span></h1>
+    <p>Explore o material do nosso trabalho de Ciências e baixe a apresentação completa em poucos cliques.</p>
+    <div class="hero-badges">
+      <div class="badge">
+        <div class="badge-icon">🎯</div>
+        <div><strong>Uma missão.</strong><br>Novas descobertas.</div>
+      </div>
+      <div class="badge">
+        <div class="badge-icon">🛡️</div>
+        <div><strong>Acesso seguro.</strong><br>Download protegido.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FILE SECTION -->
+  <section class="file-section">
+    <div class="section-label">
+      <span class="section-label-num">01</span>
+      Arquivo da missão
+      <div class="section-label-line"></div>
+    </div>
+
+    <div class="file-card" id="file-card">
+      <div class="file-card-top">
+        <div class="file-icon-wrap">
+          <div class="file-icon">
+            <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="4" y="2" width="20" height="26" rx="3" fill="url(#ppt-grad)"/>
+              <rect x="8" y="8" width="12" height="2" rx="1" fill="rgba(255,255,255,0.5)"/>
+              <rect x="8" y="13" width="9" height="2" rx="1" fill="rgba(255,255,255,0.35)"/>
+              <rect x="8" y="18" width="7" height="2" rx="1" fill="rgba(255,255,255,0.25)"/>
+              <rect x="22" y="0" width="10" height="10" rx="2" fill="#1e3a8a"/>
+              <text x="27" y="8" font-size="8" fill="white" text-anchor="middle" font-family="Arial" font-weight="bold">P</text>
+              <defs>
+                <linearGradient id="ppt-grad" x1="4" y1="2" x2="24" y2="28" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#3b82f6"/>
+                  <stop offset="1" stop-color="#6d28d9"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <div class="file-status-dot waiting" id="status-dot"></div>
+        </div>
+        <div class="file-info">
+          <div class="file-info-meta" id="file-meta-label">APRESENTAÇÃO · TRABALHO ESCOLAR</div>
+          <h2>Slider de Ciências</h2>
+          <p>Todo o conteúdo do nosso projeto reunido em uma apresentação, pronto para explorar e compartilhar conhecimento.</p>
+        </div>
+        <div class="file-card-id">SCI / 001</div>
+      </div>
+
+      <div class="file-meta-grid">
+        <div class="file-meta-cell">
+          <div class="file-meta-label">Formato</div>
+          <div class="file-meta-value" id="display-format">PPTX / PPT / PDF</div>
+        </div>
+        <div class="file-meta-cell">
+          <div class="file-meta-label">Tamanho</div>
+          <div class="file-meta-value" id="display-size">Aguardando arquivo</div>
+        </div>
+        <div class="file-meta-cell">
+          <div class="file-meta-label">Atualizado</div>
+          <div class="file-meta-value" id="display-date">Ainda não publicado</div>
+        </div>
+      </div>
+
+      <div id="download-area">
+        <div class="btn-download-pending" id="btn-pending">
+          <span>⏳</span> Material em preparação
+        </div>
+        <div class="download-note" id="download-note-pending">
+          🔒 O arquivo aparecerá aqui após a publicação
+        </div>
+      </div>
+
+      <div id="download-area-ready" style="display:none;">
+        <button class="btn-download" id="btn-download-main">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 2v13M7 11l5 5 5-5"/><path d="M3 19h18"/></svg>
+          Baixar arquivo
+        </button>
+        <div class="download-note">
+          🔒 O download exige autenticação
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECURITY SECTION -->
+  <section class="security-section">
+    <div class="security-card">
+      <div class="security-icon">🛡️</div>
+      <div class="security-text">
+        <p><strong>Seu acesso, com segurança.</strong> O arquivo é protegido por autenticação. Apenas membros autorizados do grupo podem realizar o download. Os dados de acesso são validados antes de cada transferência.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Slider de Ciências &nbsp;·&nbsp; Trabalho Escolar &nbsp;·&nbsp; Grupo Bazet 2026
+  </footer>
+</div>
+
+<!-- ── MODAL: ADMIN LOGIN ── -->
+<div class="modal-overlay" id="modal-login">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-login')">×</button>
+    <div class="modal-icon admin">🔐</div>
+    <h3>Acesso administrativo</h3>
+    <p class="modal-desc">Entre com suas credenciais para gerenciar o arquivo publicado.</p>
+    <div class="form-group">
+      <label class="form-label">Usuário</label>
+      <div class="form-input-wrap">
+        <input type="text" class="form-input" id="admin-user" placeholder="nome de usuário" autocomplete="off">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Senha</label>
+      <div class="form-input-wrap">
+        <input type="password" class="form-input" id="admin-pass" placeholder="••••••••">
+        <button class="toggle-pw" onclick="togglePw('admin-pass', this)" type="button">
+          <svg id="eye-admin" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="form-error" id="admin-error">Usuário ou senha incorretos.</div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('modal-login')">Cancelar</button>
+      <button class="btn-confirm" id="btn-admin-login">Entrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL: DOWNLOAD AUTH ── -->
+<div class="modal-overlay" id="modal-download">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-download')">×</button>
+    <div class="modal-icon download">⬇️</div>
+    <h3>Acesso ao download</h3>
+    <p class="modal-desc">Digite seu usuário e sua senha para liberar o arquivo.</p>
+    <div class="form-group">
+      <label class="form-label">Usuário</label>
+      <div class="form-input-wrap">
+        <input type="text" class="form-input" id="dl-user" placeholder="nome de usuário" autocomplete="off">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Senha</label>
+      <div class="form-input-wrap">
+        <input type="password" class="form-input" id="dl-pass" placeholder="••••••••">
+        <button class="toggle-pw" onclick="togglePw('dl-pass', this)" type="button">
+          <svg id="eye-dl" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="form-error" id="dl-error">Usuário ou senha incorretos. Verifique os dados e tente novamente.</div>
+    <div class="form-success" id="dl-success">✅ Autenticado! O download vai começar...</div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('modal-download')">Cancelar</button>
+      <button class="btn-confirm" id="btn-dl-confirm">Liberar download</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── ADMIN PANEL ── -->
+<div class="admin-panel" id="admin-panel">
+  <div class="admin-header">
+    <div class="admin-title">SLIDER DE CIÊNCIAS — <span>ADMIN</span></div>
+    <button class="btn-logout" id="btn-logout">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sair da conta
+    </button>
+  </div>
+  <div class="admin-body">
+    <div class="upload-zone" id="upload-zone">
+      <div class="upload-zone-icon">📂</div>
+      <h3>+ ADD ARQUIVO</h3>
+      <p>Clique para selecionar ou arraste o arquivo aqui</p>
+      <button class="btn-add-file" onclick="document.getElementById('file-input').click()">
+        <span>+</span> Selecionar arquivo
+      </button>
+      <div class="upload-formats">Formatos aceitos: .pptx · .ppt · .pdf</div>
+      <input type="file" id="file-input" accept=".pptx,.ppt,.pdf">
+    </div>
+
+    <!-- File preview -->
+    <div class="file-preview" id="file-preview">
+      <div class="file-preview-row">
+        <div class="file-preview-icon" id="preview-icon">📊</div>
+        <div class="file-preview-info">
+          <div class="file-preview-name" id="preview-name">arquivo.pptx</div>
+          <div class="file-preview-meta" id="preview-meta">10 MB · PPTX</div>
+        </div>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progress-fill"></div>
+      </div>
+      <div class="progress-text" id="progress-text">Pronto para enviar</div>
+      <div class="upload-actions" style="margin-top:16px;">
+        <button class="btn-cancel" onclick="cancelUpload()">Cancelar</button>
+        <button class="btn-confirm" id="btn-publish" onclick="publishFile()">✓ Publicar arquivo</button>
+      </div>
+    </div>
+
+    <!-- Current published file -->
+    <div class="admin-current">
+      <h4>Arquivo publicado</h4>
+      <div id="admin-current-content">
+        <div class="no-file-msg">Nenhum arquivo publicado ainda.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STARS CANVAS ──
+const canvas = document.getElementById('cosmos');
+const ctx = canvas.getContext('2d');
+let stars = [];
+
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', () => { resize(); initStars(); });
+
+function initStars() {
+  stars = [];
+  const count = Math.floor((canvas.width * canvas.height) / 3500);
+  for (let i = 0; i < count; i++) {
+    stars.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1.4 + 0.2,
+      alpha: Math.random(),
+      delta: (Math.random() * 0.008 + 0.002) * (Math.random() < 0.5 ? 1 : -1),
+      color: Math.random() < 0.15 ? '#48E5FF' : Math.random() < 0.1 ? '#8B5CF6' : '#ffffff'
+    });
+  }
+}
+initStars();
+
+function drawStars() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // deep space gradient
+  const bg = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 0, canvas.width/2, canvas.height/2, canvas.width * 0.8);
+  bg.addColorStop(0, '#080D20');
+  bg.addColorStop(1, '#050611');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  for (const s of stars) {
+    s.alpha += s.delta;
+    if (s.alpha <= 0 || s.alpha >= 1) s.delta *= -1;
+    ctx.globalAlpha = Math.max(0, Math.min(1, s.alpha));
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = s.color;
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  requestAnimationFrame(drawStars);
+}
+drawStars();
+
+// ── STATE ──
+// NOTE: In a real production app, credentials would NEVER be in frontend JS.
+// This is a fully client-side simulation — no backend available.
+const ADMIN_CREDS = { u: 'ph', p: 'trajado009' };
+const DL_CREDS    = { u: 'bazet2026', p: 'melhorgrupo' };
+
+let isAdminLoggedIn = false;
+let publishedFile = null; // { name, size, ext, date, dataUrl }
+let selectedFile = null;
+
+// Load from localStorage
+function loadState() {
+  try {
+    const saved = localStorage.getItem('slider_ciencias_file');
+    if (saved) {
+      publishedFile = JSON.parse(saved);
+      updateMainCard();
+      updateAdminCurrent();
+    }
+  } catch(e) {}
+}
+loadState();
+
+// ── MODAL UTILS ──
+function openModal(id) {
+  document.getElementById(id).classList.add('active');
+  const firstInput = document.querySelector(`#${id} input`);
+  if (firstInput) setTimeout(() => firstInput.focus(), 100);
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+  // clear fields
+  document.querySelectorAll(`#${id} input`).forEach(i => i.value = '');
+  document.querySelectorAll(`#${id} .form-error`).forEach(e => e.classList.remove('show'));
+  document.querySelectorAll(`#${id} .form-success`).forEach(e => e.classList.remove('show'));
+}
+
+// close on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) closeModal(overlay.id);
+  });
+});
+
+// ── TOGGLE PASSWORD ──
+function togglePw(inputId, btn) {
+  const input = document.getElementById(inputId);
+  input.type = input.type === 'password' ? 'text' : 'password';
+}
+
+// ── TOAST ──
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type ? ' ' + type : '');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── ADMIN LOGIN ──
+document.getElementById('btn-open-login').addEventListener('click', () => {
+  if (isAdminLoggedIn) {
+    document.getElementById('admin-panel').classList.add('active');
+  } else {
+    openModal('modal-login');
+  }
+});
+
+document.getElementById('btn-admin-login').addEventListener('click', doAdminLogin);
+document.getElementById('admin-pass').addEventListener('keydown', e => { if (e.key === 'Enter') doAdminLogin(); });
+
+function doAdminLogin() {
+  const u = document.getElementById('admin-user').value.trim();
+  const p = document.getElementById('admin-pass').value;
+  const err = document.getElementById('admin-error');
+  if (u === ADMIN_CREDS.u && p === ADMIN_CREDS.p) {
+    isAdminLoggedIn = true;
+    err.classList.remove('show');
+    closeModal('modal-login');
+    document.getElementById('admin-panel').classList.add('active');
+    document.getElementById('btn-open-login').innerHTML = `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> Admin ✓`;
+    showToast('Bem-vindo ao painel, admin!', 'success');
+    updateAdminCurrent();
+  } else {
+    err.classList.add('show');
+    document.getElementById('admin-pass').value = '';
+  }
+}
+
+// ── LOGOUT ──
+document.getElementById('btn-logout').addEventListener('click', () => {
+  isAdminLoggedIn = false;
+  document.getElementById('admin-panel').classList.remove('active');
+  document.getElementById('btn-open-login').innerHTML = `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> Login`;
+  showToast('Sessão encerrada.', '');
+});
+
+// ── FILE INPUT ──
+const fileInput = document.getElementById('file-input');
+fileInput.addEventListener('change', e => {
+  if (e.target.files[0]) handleFileSelected(e.target.files[0]);
+});
+
+// Drag and drop
+const zone = document.getElementById('upload-zone');
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+zone.addEventListener('drop', e => {
+  e.preventDefault();
+  zone.classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if (f && /\.(pptx|ppt|pdf)$/i.test(f.name)) handleFileSelected(f);
+  else showToast('Formato não aceito. Use .pptx, .ppt ou .pdf', 'error');
+});
+
+function handleFileSelected(file) {
+  selectedFile = file;
+  const ext = file.name.split('.').pop().toUpperCase();
+  const size = formatBytes(file.size);
+  document.getElementById('preview-name').textContent = file.name;
+  document.getElementById('preview-meta').textContent = `${size} · ${ext}`;
+  document.getElementById('preview-icon').textContent = ext === 'PDF' ? '📄' : '📊';
+  document.getElementById('progress-fill').style.width = '0%';
+  document.getElementById('progress-text').textContent = 'Pronto para enviar';
+  document.getElementById('file-preview').classList.add('show');
+}
+
+function cancelUpload() {
+  selectedFile = null;
+  fileInput.value = '';
+  document.getElementById('file-preview').classList.remove('show');
+}
+
+function formatBytes(b) {
+  if (b < 1024) return b + ' B';
+  if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+  return (b/1048576).toFixed(2) + ' MB';
+}
+
+// ── PUBLISH FILE ──
+function publishFile() {
+  if (!selectedFile) return;
+  const btn = document.getElementById('btn-publish');
+  btn.disabled = true;
+  btn.textContent = 'Publicando...';
+
+  // Simulate progress
+  let progress = 0;
+  const fill = document.getElementById('progress-fill');
+  const txt = document.getElementById('progress-text');
+  const interval = setInterval(() => {
+    progress += Math.random() * 18 + 8;
+    if (progress >= 100) {
+      progress = 100;
+      clearInterval(interval);
+      fill.style.width = '100%';
+      txt.textContent = 'Upload completo!';
+
+      // Read file as base64 for localStorage
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const ext = selectedFile.name.split('.').pop().toUpperCase();
+        publishedFile = {
+          name: selectedFile.name,
+          friendlyName: 'Slider-de-Ciencias.' + selectedFile.name.split('.').pop(),
+          size: formatBytes(selectedFile.size),
+          ext: ext,
+          date: new Date().toLocaleDateString('pt-BR'),
+          dataUrl: ev.target.result
+        };
+        try { localStorage.setItem('slider_ciencias_file', JSON.stringify(publishedFile)); } catch(e) {}
+        updateMainCard();
+        updateAdminCurrent();
+        cancelUpload();
+        btn.disabled = false;
+        btn.textContent = '✓ Publicar arquivo';
+        showToast('Arquivo publicado com sucesso! 🚀', 'success');
+      };
+      reader.readAsDataURL(selectedFile);
+    } else {
+      fill.style.width = progress + '%';
+      txt.textContent = `Enviando... ${Math.round(progress)}%`;
+    }
+  }, 120);
+}
+
+// ── UPDATE MAIN CARD ──
+function updateMainCard() {
+  const dot = document.getElementById('status-dot');
+  const pending = document.getElementById('download-area');
+  const ready = document.getElementById('download-area-ready');
+  const fmt = document.getElementById('display-format');
+  const size = document.getElementById('display-size');
+  const date = document.getElementById('display-date');
+  const metaLabel = document.getElementById('file-meta-label');
+
+  if (publishedFile) {
+    dot.className = 'file-status-dot ready';
+    pending.style.display = 'none';
+    ready.style.display = 'block';
+    fmt.textContent = publishedFile.ext;
+    size.textContent = publishedFile.size;
+    date.textContent = publishedFile.date;
+    metaLabel.textContent = 'APRESENTAÇÃO · TRABALHO ESCOLAR';
+  } else {
+    dot.className = 'file-status-dot waiting';
+    pending.style.display = 'block';
+    ready.style.display = 'none';
+    fmt.textContent = 'PPTX / PPT / PDF';
+    size.textContent = 'Aguardando arquivo';
+    date.textContent = 'Ainda não publicado';
+  }
+}
+
+// ── UPDATE ADMIN CURRENT ──
+function updateAdminCurrent() {
+  const el = document.getElementById('admin-current-content');
+  if (!publishedFile) {
+    el.innerHTML = '<div class="no-file-msg">Nenhum arquivo publicado ainda.</div>';
+    return;
+  }
+  el.innerHTML = `
+    <div class="current-file-row">
+      <div style="font-size:24px">${publishedFile.ext === 'PDF' ? '📄' : '📊'}</div>
+      <div class="current-file-info">
+        <div class="current-file-name">Slider de Ciências <span style="color:var(--text-muted);font-weight:400">.${publishedFile.ext.toLowerCase()}</span></div>
+        <div class="current-file-meta">${publishedFile.size} · Publicado em ${publishedFile.date}</div>
+      </div>
+      <button class="btn-delete" onclick="deleteFile()">🗑 Remover</button>
+    </div>
+  `;
+}
+
+function deleteFile() {
+  if (!confirm('Remover o arquivo publicado? Os visitantes não poderão mais baixá-lo.')) return;
+  publishedFile = null;
+  try { localStorage.removeItem('slider_ciencias_file'); } catch(e) {}
+  updateMainCard();
+  updateAdminCurrent();
+  showToast('Arquivo removido.', '');
+}
+
+// ── DOWNLOAD FLOW ──
+document.getElementById('btn-download-main').addEventListener('click', () => {
+  openModal('modal-download');
+});
+
+document.getElementById('btn-dl-confirm').addEventListener('click', doDownload);
+document.getElementById('dl-pass').addEventListener('keydown', e => { if (e.key === 'Enter') doDownload(); });
+
+function doDownload() {
+  const u = document.getElementById('dl-user').value.trim();
+  const p = document.getElementById('dl-pass').value;
+  const err = document.getElementById('dl-error');
+  const suc = document.getElementById('dl-success');
+
+  if (u === DL_CREDS.u && p === DL_CREDS.p) {
+    err.classList.remove('show');
+    suc.classList.add('show');
+    document.getElementById('btn-dl-confirm').disabled = true;
+
+    setTimeout(() => {
+      if (publishedFile && publishedFile.dataUrl) {
+        const a = document.createElement('a');
+        a.href = publishedFile.dataUrl;
+        a.download = publishedFile.friendlyName || 'Slider-de-Ciencias';
+        a.click();
+        showToast('Download iniciado! 🚀', 'success');
+      } else {
+        showToast('Arquivo não encontrado.', 'error');
+      }
+      closeModal('modal-download');
+      document.getElementById('btn-dl-confirm').disabled = false;
+    }, 1200);
+  } else {
+    err.classList.add('show');
+    suc.classList.remove('show');
+    document.getElementById('dl-pass').value = '';
+  }
+}
+
+// Escape key closes modals
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.active').forEach(m => closeModal(m.id));
+    // don't close admin panel on escape
+  }
+});
+</script>
+</body>
+</html>
